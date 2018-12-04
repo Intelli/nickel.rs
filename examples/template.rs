@@ -1,18 +1,16 @@
-extern crate nickel;
+#[macro_use] extern crate nickel;
 
-use nickel::{Nickel, HttpRouter, Request, Response, MiddlewareResult};
 use std::collections::HashMap;
-
-fn render<'mw, 'conn>(_req: &mut Request<'mw, 'conn>, res: Response<'mw>) -> MiddlewareResult<'mw> {
-    let mut data = HashMap::<&str, &str>::new();
-    data.insert("name", "user");
-    return res.render("examples/assets/template.tpl", &data)
-}
+use nickel::{Nickel, HttpRouter};
 
 fn main() {
     let mut server = Nickel::new();
 
-    server.get("/", render);
+    server.get("/", middleware! { |_, response|
+        let mut data = HashMap::new();
+        data.insert("name", "user");
+        return response.render("examples/assets/template.tpl", &data);
+    });
 
-    server.listen("127.0.0.1:6767").unwrap();
+    server.listen("127.0.0.1:6767");
 }
